@@ -36,11 +36,7 @@ db.query('SELECT 1')
 
 // Routes
 app.use('/', require('./routes/authRoutes'));
-
-// Page d'accueil
-app.get('/', (req, res) => {
-  res.render('home');
-});
+app.use('/', require('./routes/topicRoutes'));
 
 app.listen(process.env.PORT, () => {
   console.log(`Serveur lancé sur http://localhost:${process.env.PORT}`);

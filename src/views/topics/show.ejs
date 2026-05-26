@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title><%= topic.title %></title>
+</head>
+<body>
+  <a href="/">← Retour</a>
+  <h1><%= topic.title %></h1>
+  <p>Par <strong><%= topic.username %></strong> | <%= new Date(topic.created_at).toLocaleDateString('fr-FR') %></p>
+  <p>Tags : <%= topic.tags || 'Aucun' %></p>
+  <p>État : <%= topic.status %></p>
+  <hr>
+  <p><%= topic.body %></p>
+  <hr>
+  <h2>Messages</h2>
+  <p>Les messages arrivent bientôt...</p>
+</body>
+</html>

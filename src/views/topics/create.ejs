@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Créer un topic</title>
+</head>
+<body>
+  <h1>Créer un topic</h1>
+  <% if (error) { %>
+    <p style="color:red;"><%= error %></p>
+  <% } %>
+  <form method="POST" action="/topics/create">
+    <label>Titre :</label><br>
+    <input type="text" name="title" required /><br><br>
+    <label>Corps :</label><br>
+    <textarea name="body" rows="6" cols="50" required></textarea><br><br>
+    <label>Tags (séparés par des virgules) :</label><br>
+    <input type="text" name="tags" placeholder="ex: javascript, aide, question" /><br><br>
+    <button type="submit">Créer</button>
+  </form>
+  <a href="/">Retour</a>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Forum</title>
+</head>
+<body>
+  <h1>Forum</h1>
+  <% if (user) { %>
+    <p>Connecté : <strong><%= user.username %></strong> | <a href="/logout">Déconnexion</a></p>
+    <a href="/topics/create">+ Nouveau topic</a>
+  <% } else { %>
+    <a href="/login">Se connecter</a> | <a href="/register">S'inscrire</a>
+  <% } %>
+
+  <hr>
+  <h2>Topics</h2>
+  <% if (topics.length === 0) { %>
+    <p>Aucun topic pour le moment.</p>
+  <% } %>
+  <% topics.forEach(topic => { %>
+    <div>
+      <h3><a href="/topics/<%= topic.id %>"><%= topic.title %></a></h3>
+      <p>Par <strong><%= topic.username %></strong> | <%= new Date(topic.created_at).toLocaleDateString('fr-FR') %></p>
+      <p>Tags : <%= topic.tags || 'Aucun' %></p>
+      <p>État : <%= topic.status %></p>
+    </div>
+    <hr>
+  <% }) %>
+</body>
+</html>
