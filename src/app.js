@@ -34,6 +34,14 @@ db.query('SELECT 1')
   .then(() => console.log('✅ Connecté à MySQL'))
   .catch(err => console.error('❌ Erreur MySQL :', err));
 
+// Routes
+app.use('/', require('./routes/authRoutes'));
+
+// Page d'accueil
+app.get('/', (req, res) => {
+  res.render('home');
+});
+
 app.listen(process.env.PORT, () => {
   console.log(`Serveur lancé sur http://localhost:${process.env.PORT}`);
 });

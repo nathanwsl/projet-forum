@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Connexion</title>
+</head>
+<body>
+  <h1>Connexion</h1>
+  <% if (error) { %>
+    <p style="color:red;"><%= error %></p>
+  <% } %>
+  <form method="POST" action="/login">
+    <label>Pseudo ou email :</label>
+    <input type="text" name="identifier" required /><br>
+    <label>Mot de passe :</label>
+    <input type="password" name="password" required /><br>
+    <button type="submit">Se connecter</button>
+  </form>
+  <a href="/register">Pas encore de compte ? S'inscrire</a>
+</body>
+</html>
