@@ -13,7 +13,34 @@
   <hr>
   <p><%= topic.body %></p>
   <hr>
-  <h2>Messages</h2>
-  <p>Les messages arrivent bientôt...</p>
+
+  <h2>Messages (<%= messages.length %>)</h2>
+
+  <% messages.forEach(function(message) { %>
+    <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+      <p><strong><%= message.username %></strong> | <%= new Date(message.sent_at).toLocaleDateString('fr-FR') %></p>
+      <p><%= message.body %></p>
+      <p>👍 <%= message.likes %> | 👎 <%= message.dislikes %></p>
+
+      <% if (user && (user.id === topic.author_id || user.id === message.author_id || user.role === 'admin')) { %>
+        <form method="POST" action="/topics/<%= topic.id %>/messages/<%= message.id %>/delete">
+          <button type="submit">🗑️ Supprimer</button>
+        </form>
+      <% } %>
+    </div>
+  <% }) %>
+
+  <hr>
+  <% if (user && topic.status === 'open') { %>
+    <h3>Poster un message</h3>
+    <form method="POST" action="/topics/<%= topic.id %>/messages">
+      <textarea name="body" rows="4" cols="50" placeholder="Votre message..." required></textarea><br><br>
+      <button type="submit">Envoyer</button>
+    </form>
+  <% } else if (!user) { %>
+    <p><a href="/login">Connecte-toi</a> pour poster un message.</p>
+  <% } else if (topic.status === 'closed') { %>
+    <p>Ce topic est fermé, impossible de poster.</p>
+  <% } %>
 </body>
 </html>

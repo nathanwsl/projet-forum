@@ -1,4 +1,5 @@
 const { createTopic, getAllTopics, getTopicById } = require('../models/topicModel');
+const { createMessage, getMessagesByTopic, deleteMessage, getMessageById } = require('../models/messageModel');
 
 // Page d'accueil avec liste des topics
 exports.index = async (req, res) => {
@@ -35,12 +36,58 @@ exports.create = async (req, res) => {
   }
 };
 
-// Consulter un topic
+// Consulter un topic avec ses messages
 exports.show = async (req, res) => {
   try {
     const topic = await getTopicById(req.params.id);
     if (!topic) return res.send('Topic introuvable');
-    res.render('topics/show', { topic });
+    const messages = await getMessagesByTopic(req.params.id);
+    res.render('topics/show', { topic, messages });
+  } catch (err) {
+    console.error(err);
+    res.send('Erreur serveur');
+  }
+};
+
+// Poster un message
+exports.postMessage = async (req, res) => {
+  const { body } = req.body;
+  const topicId = req.params.id;
+  const authorId = req.session.user.id;
+
+  if (!body) return res.redirect(`/topics/${topicId}`);
+
+  try {
+    const topic = await getTopicById(topicId);
+    if (topic.status === 'closed' || topic.status === 'archived') {
+      return res.redirect(`/topics/${topicId}`);
+    }
+    await createMessage(topicId, authorId, body);
+    res.redirect(`/topics/${topicId}`);
+  } catch (err) {
+    console.error(err);
+    res.send('Erreur serveur');
+  }
+};
+
+// Supprimer un message (propriétaire du topic)
+exports.deleteMessage = async (req, res) => {
+  const { topicId, messageId } = req.params;
+  const userId = req.session.user.id;
+
+  try {
+    const topic = await getTopicById(topicId);
+    const message = await getMessageById(messageId);
+
+    if (!message) return res.send('Message introuvable');
+
+    // Seul le propriétaire du topic ou l'auteur du message peut supprimer
+    if (topic.author_id !== userId && message.author_id !== userId && req.session.user.role !== 'admin') {
+      return res.send('Non autorisé');
+    }
+
+    await deleteMessage(messageId);
+    res.redirect(`/topics/${topicId}`);
   } catch (err) {
     console.error(err);
     res.send('Erreur serveur');
