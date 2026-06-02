@@ -35,13 +35,13 @@ exports.create = async (req, res) => {
   }
 };
 
-// Consulter un topic avec ses messages
 exports.show = async (req, res) => {
   try {
     const topic = await getTopicById(req.params.id);
     if (!topic) return res.send('Topic introuvable');
-    const messages = await getMessagesByTopic(req.params.id);
-    res.render('topics/show', { topic, messages });
+    const sort = req.query.sort || 'date';
+    const messages = await getMessagesByTopic(req.params.id, sort);
+    res.render('topics/show', { topic, messages, sort });
   } catch (err) {
     console.error(err);
     res.send('Erreur serveur');

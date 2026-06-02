@@ -8,7 +8,13 @@ async function createMessage(topicId, authorId, body) {
   return result.insertId;
 }
 
-async function getMessagesByTopic(topicId) {
+async function getMessagesByTopic(topicId, sort = 'date') {
+  let orderBy = 'm.sent_at DESC';
+
+  if (sort === 'popularity') {
+    orderBy = '(SUM(CASE WHEN r.type = "like" THEN 1 ELSE 0 END) - SUM(CASE WHEN r.type = "dislike" THEN 1 ELSE 0 END)) DESC';
+  }
+
   const [rows] = await db.query(`
     SELECT m.*, u.username,
       SUM(CASE WHEN r.type = 'like' THEN 1 ELSE 0 END) as likes,
@@ -18,7 +24,7 @@ async function getMessagesByTopic(topicId) {
     LEFT JOIN reactions r ON m.id = r.message_id
     WHERE m.topic_id = ?
     GROUP BY m.id
-    ORDER BY m.sent_at DESC
+    ORDER BY ${orderBy}
   `, [topicId]);
   return rows;
 }

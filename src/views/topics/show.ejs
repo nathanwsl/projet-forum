@@ -16,6 +16,13 @@
 
   <h2>Messages (<%= messages.length %>)</h2>
 
+  <form method="GET" action="/topics/<%= topic.id %>">
+  <label>Trier par :</label>
+  <select name="sort" onchange="this.form.submit()">
+    <option value="date" <%= sort === 'date' ? 'selected' : '' %>>Plus récent</option>
+    <option value="popularity" <%= sort === 'popularity' ? 'selected' : '' %>>Popularité</option>
+  </select>
+</form>
   <% messages.forEach(function(message) { %>
     <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
       <p><strong><%= message.username %></strong> | <%= new Date(message.sent_at).toLocaleDateString('fr-FR') %></p>
