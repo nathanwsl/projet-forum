@@ -1,5 +1,6 @@
 const { createTopic, getAllTopics, getTopicById } = require('../models/topicModel');
 const { createMessage, getMessagesByTopic, deleteMessage, getMessageById } = require('../models/messageModel');
+const { reactToMessage } = require('../models/reactionModel');
 
 // Page d'accueil avec liste des topics
 exports.index = async (req, res) => {
@@ -21,11 +22,9 @@ exports.showCreate = (req, res) => {
 exports.create = async (req, res) => {
   const { title, body, tags } = req.body;
   const authorId = req.session.user.id;
-
   if (!title || !body) {
     return res.render('topics/create', { error: 'Le titre et le corps sont obligatoires.' });
   }
-
   try {
     const tagsArray = tags ? tags.split(',') : [];
     await createTopic(title, body, authorId, tagsArray);
@@ -54,9 +53,7 @@ exports.postMessage = async (req, res) => {
   const { body } = req.body;
   const topicId = req.params.id;
   const authorId = req.session.user.id;
-
   if (!body) return res.redirect(`/topics/${topicId}`);
-
   try {
     const topic = await getTopicById(topicId);
     if (topic.status === 'closed' || topic.status === 'archived') {
@@ -70,23 +67,35 @@ exports.postMessage = async (req, res) => {
   }
 };
 
-// Supprimer un message (propriétaire du topic)
+// Supprimer un message
 exports.deleteMessage = async (req, res) => {
   const { topicId, messageId } = req.params;
   const userId = req.session.user.id;
-
   try {
     const topic = await getTopicById(topicId);
     const message = await getMessageById(messageId);
-
     if (!message) return res.send('Message introuvable');
-
-    // Seul le propriétaire du topic ou l'auteur du message peut supprimer
     if (topic.author_id !== userId && message.author_id !== userId && req.session.user.role !== 'admin') {
       return res.send('Non autorisé');
     }
-
     await deleteMessage(messageId);
+    res.redirect(`/topics/${topicId}`);
+  } catch (err) {
+    console.error(err);
+    res.send('Erreur serveur');
+  }
+};
+
+// Liker ou disliker un message
+exports.reactMessage = async (req, res) => {
+  const { topicId, messageId } = req.params;
+  const { type } = req.body;
+  const userId = req.session.user.id;
+  if (type !== 'like' && type !== 'dislike') {
+    return res.redirect(`/topics/${topicId}`);
+  }
+  try {
+    await reactToMessage(messageId, userId, type);
     res.redirect(`/topics/${topicId}`);
   } catch (err) {
     console.error(err);

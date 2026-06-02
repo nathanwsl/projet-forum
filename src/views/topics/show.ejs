@@ -20,7 +20,16 @@
     <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
       <p><strong><%= message.username %></strong> | <%= new Date(message.sent_at).toLocaleDateString('fr-FR') %></p>
       <p><%= message.body %></p>
-      <p>👍 <%= message.likes %> | 👎 <%= message.dislikes %></p>
+      <<p>
+  <form method="POST" action="/topics/<%= topic.id %>/messages/<%= message.id %>/react" style="display:inline;">
+    <input type="hidden" name="type" value="like">
+    <button type="submit">👍 <%= message.likes %></button>
+  </form>
+  <form method="POST" action="/topics/<%= topic.id %>/messages/<%= message.id %>/react" style="display:inline;">
+    <input type="hidden" name="type" value="dislike">
+    <button type="submit">👎 <%= message.dislikes %></button>
+  </form>
+</p>
 
       <% if (user && (user.id === topic.author_id || user.id === message.author_id || user.role === 'admin')) { %>
         <form method="POST" action="/topics/<%= topic.id %>/messages/<%= message.id %>/delete">

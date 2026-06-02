@@ -9,5 +9,6 @@ router.post('/topics/create', isAuth, topicController.create);
 router.get('/topics/:id', topicController.show);
 router.post('/topics/:id/messages', isAuth, topicController.postMessage);
 router.post('/topics/:topicId/messages/:messageId/delete', isAuth, topicController.deleteMessage);
+router.post('/topics/:topicId/messages/:messageId/react', isAuth, topicController.reactMessage);
 
 module.exports = router;
