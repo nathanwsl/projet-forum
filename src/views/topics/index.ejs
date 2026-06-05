@@ -27,5 +27,24 @@
     </div>
     <hr>
   <% }) %>
+  <div>
+  <label>Afficher par : </label>
+  <% limitOptions.forEach(function(l) { %>
+    <a href="/?limit=<%= l %>&page=1"><%= l %></a> |
+  <% }) %>
+  <a href="/?all=1">Tout</a>
+</div>
+
+<% if (!all) { %>
+  <div>
+    <% if (page > 1) { %>
+      <a href="/?limit=<%= limit %>&page=<%= page - 1 %>">← Précédent</a>
+    <% } %>
+    Page <%= page %> / <%= totalPages %>
+    <% if (page < totalPages) { %>
+      <a href="/?limit=<%= limit %>&page=<%= page + 1 %>">Suivant →</a>
+    <% } %>
+  </div>
+<% } %>
 </body>
 </html>

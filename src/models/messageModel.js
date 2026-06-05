@@ -8,7 +8,7 @@ async function createMessage(topicId, authorId, body) {
   return result.insertId;
 }
 
-async function getMessagesByTopic(topicId, sort = 'date') {
+async function getMessagesByTopic(topicId, sort = 'date', limit = 10, offset = 0) {
   let orderBy = 'm.sent_at DESC';
 
   if (sort === 'popularity') {
@@ -25,8 +25,17 @@ async function getMessagesByTopic(topicId, sort = 'date') {
     WHERE m.topic_id = ?
     GROUP BY m.id
     ORDER BY ${orderBy}
-  `, [topicId]);
+    LIMIT ? OFFSET ?
+  `, [topicId, limit, offset]);
   return rows;
+}
+
+async function countMessages(topicId) {
+  const [rows] = await db.query(
+    'SELECT COUNT(*) as total FROM messages WHERE topic_id = ?',
+    [topicId]
+  );
+  return rows[0].total;
 }
 
 async function deleteMessage(messageId) {
@@ -38,4 +47,4 @@ async function getMessageById(messageId) {
   return rows[0];
 }
 
-module.exports = { createMessage, getMessagesByTopic, deleteMessage, getMessageById };
+module.exports = { createMessage, getMessagesByTopic, deleteMessage, getMessageById, countMessages };

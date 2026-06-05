@@ -1,12 +1,18 @@
-const { createTopic, getAllTopics, getTopicById } = require('../models/topicModel');
-const { createMessage, getMessagesByTopic, deleteMessage, getMessageById } = require('../models/messageModel');
+const { createTopic, getAllTopics, getTopicById, countTopics } = require('../models/topicModel');
+const { createMessage, getMessagesByTopic, deleteMessage, getMessageById, countMessages } = require('../models/messageModel');
 const { reactToMessage } = require('../models/reactionModel');
-
 // Page d'accueil avec liste des topics
 exports.index = async (req, res) => {
   try {
-    const topics = await getAllTopics();
-    res.render('topics/index', { topics });
+    const limitOptions = [10, 20, 30];
+    const limit = req.query.all ? null : parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+    const offset = limit ? (page - 1) * limit : 0;
+    const total = await countTopics();
+    const topics = await getAllTopics(limit || 99999, offset);
+    const totalPages = limit ? Math.ceil(total / limit) : 1;
+
+    res.render('topics/index', { topics, page, totalPages, limit, limitOptions, all: req.query.all });
   } catch (err) {
     console.error(err);
     res.send('Erreur serveur');
@@ -39,15 +45,22 @@ exports.show = async (req, res) => {
   try {
     const topic = await getTopicById(req.params.id);
     if (!topic) return res.send('Topic introuvable');
+
     const sort = req.query.sort || 'date';
-    const messages = await getMessagesByTopic(req.params.id, sort);
-    res.render('topics/show', { topic, messages, sort });
+    const limitOptions = [10, 20, 30];
+    const limit = req.query.all ? null : parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+    const offset = limit ? (page - 1) * limit : 0;
+    const total = await countMessages(req.params.id);
+    const messages = await getMessagesByTopic(req.params.id, sort, limit || 99999, offset);
+    const totalPages = limit ? Math.ceil(total / limit) : 1;
+
+    res.render('topics/show', { topic, messages, sort, page, totalPages, limit, limitOptions, all: req.query.all });
   } catch (err) {
     console.error(err);
     res.send('Erreur serveur');
   }
 };
-
 // Poster un message
 exports.postMessage = async (req, res) => {
   const { body } = req.body;

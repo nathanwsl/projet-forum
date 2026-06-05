@@ -23,7 +23,7 @@ async function createTopic(title, body, authorId, tags) {
   return topicId;
 }
 
-async function getAllTopics() {
+async function getAllTopics(limit = 10, offset = 0) {
   const [rows] = await db.query(`
     SELECT t.*, u.username,
       GROUP_CONCAT(tg.name SEPARATOR ', ') as tags
@@ -34,8 +34,17 @@ async function getAllTopics() {
     WHERE t.status != 'archived' AND t.visibility = 'public'
     GROUP BY t.id
     ORDER BY t.created_at DESC
-  `);
+    LIMIT ? OFFSET ?
+  `, [limit, offset]);
   return rows;
+}
+
+async function countTopics() {
+  const [rows] = await db.query(`
+    SELECT COUNT(*) as total FROM topics
+    WHERE status != 'archived' AND visibility = 'public'
+  `);
+  return rows[0].total;
 }
 
 async function getTopicById(id) {
@@ -52,4 +61,4 @@ async function getTopicById(id) {
   return rows[0];
 }
 
-module.exports = { createTopic, getAllTopics, getTopicById };
+module.exports = { createTopic, getAllTopics, getTopicById, countTopics };
