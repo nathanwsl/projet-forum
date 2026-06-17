@@ -1,4 +1,4 @@
-const { createTopic, getAllTopics, getTopicById, countTopics } = require('../models/topicModel');
+const { createTopic, getAllTopics, getTopicById, countTopics, getTopicsByTag, searchTopics, getAllTags } = require('../models/topicModel');
 const { createMessage, getMessagesByTopic, deleteMessage, getMessageById, countMessages } = require('../models/messageModel');
 const { reactToMessage } = require('../models/reactionModel');
 // Page d'accueil avec liste des topics
@@ -8,11 +8,27 @@ exports.index = async (req, res) => {
     const limit = req.query.all ? null : parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
     const offset = limit ? (page - 1) * limit : 0;
-    const total = await countTopics();
-    const topics = await getAllTopics(limit || 99999, offset);
+    const search = req.query.search || '';
+    const tag = req.query.tag || '';
+    const tags = await getAllTags();
+
+    let topics = [];
+    let total = 0;
+
+    if (search) {
+      topics = await searchTopics(search, limit || 99999, offset);
+      total = topics.length;
+    } else if (tag) {
+      topics = await getTopicsByTag(tag, limit || 99999, offset);
+      total = topics.length;
+    } else {
+      total = await countTopics();
+      topics = await getAllTopics(limit || 99999, offset);
+    }
+
     const totalPages = limit ? Math.ceil(total / limit) : 1;
 
-    res.render('topics/index', { topics, page, totalPages, limit, limitOptions, all: req.query.all });
+    res.render('topics/index', { topics, page, totalPages, limit, limitOptions, all: req.query.all, search, tag, tags });
   } catch (err) {
     console.error(err);
     res.send('Erreur serveur');

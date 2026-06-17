@@ -14,11 +14,37 @@
   <% } %>
 
   <hr>
+
+  <!-- Recherche -->
+  <form method="GET" action="/">
+    <input type="text" name="search" placeholder="Rechercher un topic..." value="<%= search %>" />
+    <button type="submit">🔍 Rechercher</button>
+  </form>
+
+  <!-- Filtrer par tag -->
+  <div>
+    <strong>Tags : </strong>
+    <a href="/">Tous</a> |
+    <% tags.forEach(function(t) { %>
+      <a href="/?tag=<%= t.name %>"><%= t.name %></a> |
+    <% }) %>
+  </div>
+
+  <hr>
+
   <h2>Topics</h2>
-  <% if (topics.length === 0) { %>
-    <p>Aucun topic pour le moment.</p>
+  <% if (search) { %>
+    <p>Résultats pour : "<%= search %>"</p>
   <% } %>
-  <% topics.forEach(topic => { %>
+  <% if (tag) { %>
+    <p>Tag : "<%= tag %>"</p>
+  <% } %>
+
+  <% if (topics.length === 0) { %>
+    <p>Aucun topic trouvé.</p>
+  <% } %>
+
+  <% topics.forEach(function(topic) { %>
     <div>
       <h3><a href="/topics/<%= topic.id %>"><%= topic.title %></a></h3>
       <p>Par <strong><%= topic.username %></strong> | <%= new Date(topic.created_at).toLocaleDateString('fr-FR') %></p>
@@ -27,24 +53,27 @@
     </div>
     <hr>
   <% }) %>
-  <div>
-  <label>Afficher par : </label>
-  <% limitOptions.forEach(function(l) { %>
-    <a href="/?limit=<%= l %>&page=1"><%= l %></a> |
-  <% }) %>
-  <a href="/?all=1">Tout</a>
-</div>
 
-<% if (!all) { %>
+  <!-- Pagination -->
   <div>
-    <% if (page > 1) { %>
-      <a href="/?limit=<%= limit %>&page=<%= page - 1 %>">← Précédent</a>
-    <% } %>
-    Page <%= page %> / <%= totalPages %>
-    <% if (page < totalPages) { %>
-      <a href="/?limit=<%= limit %>&page=<%= page + 1 %>">Suivant →</a>
-    <% } %>
+    <label>Afficher par : </label>
+    <% limitOptions.forEach(function(l) { %>
+      <a href="/?limit=<%= l %>&page=1&search=<%= search %>&tag=<%= tag %>"><%= l %></a> |
+    <% }) %>
+    <a href="/?all=1&search=<%= search %>&tag=<%= tag %>">Tout</a>
   </div>
-<% } %>
+
+  <% if (!all) { %>
+    <div>
+      <% if (page > 1) { %>
+        <a href="/?limit=<%= limit %>&page=<%= page - 1 %>&search=<%= search %>&tag=<%= tag %>">← Précédent</a>
+      <% } %>
+      Page <%= page %> / <%= totalPages %>
+      <% if (page < totalPages) { %>
+        <a href="/?limit=<%= limit %>&page=<%= page + 1 %>&search=<%= search %>&tag=<%= tag %>">Suivant →</a>
+      <% } %>
+    </div>
+  <% } %>
+
 </body>
 </html>
