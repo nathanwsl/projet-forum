@@ -3,21 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <title>Modifier le topic</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <h1>Modifier le topic</h1>
-  <% if (error) { %>
-    <p style="color:red;"><%= error %></p>
-  <% } %>
-  <form method="POST" action="/topics/<%= topic.id %>/edit">
-    <label>Titre :</label><br>
-    <input type="text" name="title" value="<%= topic.title %>" required /><br><br>
-    <label>Corps :</label><br>
-    <textarea name="body" rows="6" cols="50" required><%= topic.body %></textarea><br><br>
-    <label>Tags (séparés par des virgules) :</label><br>
-    <input type="text" name="tags" value="<%= topic.tags || '' %>" /><br><br>
-    <button type="submit">Modifier</button>
-  </form>
-  <a href="/topics/<%= topic.id %>">Annuler</a>
+  <nav class="navbar">
+    <h1>💬 Forum</h1>
+    <div><a href="/topics/<%= topic.id %>">← Retour</a></div>
+  </nav>
+
+  <div class="form-card" style="max-width:700px">
+    <h1>Modifier le topic</h1>
+    <% if (error) { %>
+      <div class="error"><%= error %></div>
+    <% } %>
+    <form method="POST" action="/topics/<%= topic.id %>/edit">
+      <div class="form-group">
+        <label>Titre</label>
+        <input type="text" name="title" value="<%= topic.title %>" required />
+      </div>
+      <div class="form-group">
+        <label>Corps</label>
+        <textarea name="body" rows="8" required><%= topic.body %></textarea>
+      </div>
+      <div class="form-group">
+        <label>Tags (séparés par des virgules)</label>
+        <input type="text" name="tags" value="<%= topic.tags || '' %>" />
+      </div>
+      <button type="submit" class="btn btn-primary">Modifier</button>
+      <a href="/topics/<%= topic.id %>" class="btn btn-secondary">Annuler</a>
+    </form>
+  </div>
 </body>
 </html>

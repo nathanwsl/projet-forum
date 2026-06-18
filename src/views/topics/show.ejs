@@ -3,90 +3,125 @@
 <head>
   <meta charset="UTF-8">
   <title><%= topic.title %></title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <a href="/">← Retour</a>
-  <h1><%= topic.title %></h1>
-  <p>Par <strong><%= topic.username %></strong> | <%= new Date(topic.created_at).toLocaleDateString('fr-FR') %></p>
-  <p>Tags : <%= topic.tags || 'Aucun' %></p>
-  <p>État : <%= topic.status %></p>
-  <hr>
-  <p><%= topic.body %></p>
-  <p>État : <%= topic.status %></p>
 
-<% if (user && user.id === topic.author_id) { %>
-  <a href="/topics/<%= topic.id %>/edit">✏️ Modifier</a>
-  <form method="POST" action="/topics/<%= topic.id %>/delete" style="display:inline;">
-    <button type="submit" onclick="return confirm('Supprimer ce topic ?')">🗑️ Supprimer</button>
-  </form>
-<% } %>
-
-<hr>
-<p><%= topic.body %></p>
-  <hr>
-
-  <h2>Messages (<%= messages.length %>)</h2>
-
-  <form method="GET" action="/topics/<%= topic.id %>">
-  <label>Trier par :</label>
-  <select name="sort" onchange="this.form.submit()">
-    <option value="date" <%= sort === 'date' ? 'selected' : '' %>>Plus récent</option>
-    <option value="popularity" <%= sort === 'popularity' ? 'selected' : '' %>>Popularité</option>
-  </select>
-</form>
-<div>
-  <label>Afficher par : </label>
-  <% limitOptions.forEach(function(l) { %>
-    <a href="/topics/<%= topic.id %>?sort=<%= sort %>&limit=<%= l %>&page=1"><%= l %></a> |
-  <% }) %>
-  <a href="/topics/<%= topic.id %>?sort=<%= sort %>&all=1">Tout</a>
-</div>
-
-<% if (!all) { %>
-  <div>
-    <% if (page > 1) { %>
-      <a href="/topics/<%= topic.id %>?sort=<%= sort %>&limit=<%= limit %>&page=<%= page - 1 %>">← Précédent</a>
-    <% } %>
-    Page <%= page %> / <%= totalPages %>
-    <% if (page < totalPages) { %>
-      <a href="/topics/<%= topic.id %>?sort=<%= sort %>&limit=<%= limit %>&page=<%= page + 1 %>">Suivant →</a>
-    <% } %>
-  </div>
-<% } %>
-  <% messages.forEach(function(message) { %>
-    <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
-      <p><strong><%= message.username %></strong> | <%= new Date(message.sent_at).toLocaleDateString('fr-FR') %></p>
-      <p><%= message.body %></p>
-      <<p>
-  <form method="POST" action="/topics/<%= topic.id %>/messages/<%= message.id %>/react" style="display:inline;">
-    <input type="hidden" name="type" value="like">
-    <button type="submit">👍 <%= message.likes %></button>
-  </form>
-  <form method="POST" action="/topics/<%= topic.id %>/messages/<%= message.id %>/react" style="display:inline;">
-    <input type="hidden" name="type" value="dislike">
-    <button type="submit">👎 <%= message.dislikes %></button>
-  </form>
-</p>
-
-      <% if (user && (user.id === topic.author_id || user.id === message.author_id || user.role === 'admin')) { %>
-        <form method="POST" action="/topics/<%= topic.id %>/messages/<%= message.id %>/delete">
-          <button type="submit">🗑️ Supprimer</button>
-        </form>
+  <nav class="navbar">
+    <h1>💬 Forum</h1>
+    <div>
+      <% if (user) { %>
+        Connecté : <strong style="color:white"><%= user.username %></strong>
+        <% if (user.role === 'admin') { %>
+          <a href="/admin">⚙️ Admin</a>
+        <% } %>
+        <a href="/logout">Déconnexion</a>
+      <% } else { %>
+        <a href="/login">Se connecter</a>
+        <a href="/register">S'inscrire</a>
       <% } %>
     </div>
-  <% }) %>
+  </nav>
 
-  <hr>
-  <% if (user && topic.status === 'open') { %>
-    <h3>Poster un message</h3>
-    <form method="POST" action="/topics/<%= topic.id %>/messages">
-      <textarea name="body" rows="4" cols="50" placeholder="Votre message..." required></textarea><br><br>
-      <button type="submit">Envoyer</button>
-    </form>
-  <% } else if (!user) { %>
-    <p><a href="/login">Connecte-toi</a> pour poster un message.</p>
-  <% } else if (topic.status === 'closed') { %>
-    <p>Ce topic est fermé, impossible de poster.</p>
-  <% } %>
+  <div class="container">
+    <a href="/" class="btn btn-secondary" style="margin-bottom:20px;display:inline-block">← Retour</a>
+
+    <div class="topic-card">
+      <h2><%= topic.title %></h2>
+      <div class="topic-meta">
+        Par <strong><%= topic.username %></strong> | <%= new Date(topic.created_at).toLocaleDateString('fr-FR') %>
+        &nbsp;|&nbsp; <span class="status-<%= topic.status %>"><%= topic.status %></span>
+      </div>
+      <div style="margin:10px 0">
+        <% if (topic.tags) { %>
+          <% topic.tags.split(', ').forEach(function(t) { %>
+            <a href="/?tag=<%= t %>" class="tag"><%= t %></a>
+          <% }) %>
+        <% } %>
+      </div>
+
+      <% if (user && user.id === topic.author_id) { %>
+        <div style="margin-top:10px">
+          <a href="/topics/<%= topic.id %>/edit" class="btn btn-secondary">✏️ Modifier</a>
+          <form method="POST" action="/topics/<%= topic.id %>/delete" style="display:inline;">
+            <button type="submit" class="btn btn-danger" onclick="return confirm('Supprimer ce topic ?')">🗑️ Supprimer</button>
+          </form>
+        </div>
+      <% } %>
+
+      <hr style="margin:15px 0">
+      <p style="line-height:1.7"><%= topic.body %></p>
+    </div>
+
+    <h3 style="margin:20px 0 10px">Messages (<%= messages.length %>)</h3>
+
+    <div style="display:flex;gap:15px;align-items:center;margin-bottom:15px;flex-wrap:wrap">
+      <form method="GET" action="/topics/<%= topic.id %>">
+        <select name="sort" onchange="this.form.submit()" style="padding:8px;border-radius:5px;border:1px solid #ddd">
+          <option value="date" <%= sort === 'date' ? 'selected' : '' %>>Plus récent</option>
+          <option value="popularity" <%= sort === 'popularity' ? 'selected' : '' %>>Popularité</option>
+        </select>
+      </form>
+
+      <div class="pagination">
+        <span>Afficher par :</span>
+        <% limitOptions.forEach(function(l) { %>
+          <a href="/topics/<%= topic.id %>?sort=<%= sort %>&limit=<%= l %>&page=1"><%= l %></a>
+        <% }) %>
+        <a href="/topics/<%= topic.id %>?sort=<%= sort %>&all=1">Tout</a>
+        <% if (!all) { %>
+          <% if (page > 1) { %>
+            <a href="/topics/<%= topic.id %>?sort=<%= sort %>&limit=<%= limit %>&page=<%= page - 1 %>">← Précédent</a>
+          <% } %>
+          <span>Page <%= page %> / <%= totalPages %></span>
+          <% if (page < totalPages) { %>
+            <a href="/topics/<%= topic.id %>?sort=<%= sort %>&limit=<%= limit %>&page=<%= page + 1 %>">Suivant →</a>
+          <% } %>
+        <% } %>
+      </div>
+    </div>
+
+    <% messages.forEach(function(message) { %>
+      <div class="message-card">
+        <div class="message-header">
+          <span class="message-author">👤 <%= message.username %></span>
+          <span class="message-date"><%= new Date(message.sent_at).toLocaleDateString('fr-FR') %></span>
+        </div>
+        <p class="message-body"><%= message.body %></p>
+        <div class="reactions">
+          <form method="POST" action="/topics/<%= topic.id %>/messages/<%= message.id %>/react">
+            <input type="hidden" name="type" value="like">
+            <button type="submit">👍 <%= message.likes %></button>
+          </form>
+          <form method="POST" action="/topics/<%= topic.id %>/messages/<%= message.id %>/react">
+            <input type="hidden" name="type" value="dislike">
+            <button type="submit">👎 <%= message.dislikes %></button>
+          </form>
+          <% if (user && (user.id === topic.author_id || user.id === message.author_id || user.role === 'admin')) { %>
+            <form method="POST" action="/topics/<%= topic.id %>/messages/<%= message.id %>/delete">
+              <button type="submit" class="btn btn-danger" style="padding:4px 10px;font-size:13px" onclick="return confirm('Supprimer ?')">🗑️</button>
+            </form>
+          <% } %>
+        </div>
+      </div>
+    <% }) %>
+
+    <% if (user && topic.status === 'open') { %>
+      <div class="form-card" style="max-width:100%;margin-top:20px">
+        <h3 style="margin-bottom:15px">Poster un message</h3>
+        <form method="POST" action="/topics/<%= topic.id %>/messages">
+          <div class="form-group">
+            <textarea name="body" rows="4" placeholder="Votre message..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Envoyer</button>
+        </form>
+      </div>
+    <% } else if (!user) { %>
+      <p style="margin-top:20px"><a href="/login">Connecte-toi</a> pour poster un message.</p>
+    <% } else if (topic.status === 'closed') { %>
+      <p style="margin-top:20px;color:#e74c3c">Ce topic est fermé.</p>
+    <% } %>
+
+  </div>
 </body>
 </html>
