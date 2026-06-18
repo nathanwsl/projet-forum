@@ -1,4 +1,4 @@
-const { createTopic, getAllTopics, getTopicById, countTopics, getTopicsByTag, searchTopics, getAllTags } = require('../models/topicModel');
+const { createTopic, getAllTopics, getTopicById, countTopics, getTopicsByTag, searchTopics, getAllTags, updateTopic, deleteTopic } = require('../models/topicModel');
 const { createMessage, getMessagesByTopic, deleteMessage, getMessageById, countMessages } = require('../models/messageModel');
 const { reactToMessage } = require('../models/reactionModel');
 // Page d'accueil avec liste des topics
@@ -126,6 +126,64 @@ exports.reactMessage = async (req, res) => {
   try {
     await reactToMessage(messageId, userId, type);
     res.redirect(`/topics/${topicId}`);
+  } catch (err) {
+    console.error(err);
+    res.send('Erreur serveur');
+  }
+};
+// Afficher formulaire modification topic
+exports.showEdit = async (req, res) => {
+  try {
+    const topic = await getTopicById(req.params.id);
+    if (!topic) return res.send('Topic introuvable');
+
+    if (topic.author_id !== req.session.user.id && req.session.user.role !== 'admin') {
+      return res.send('Non autorisé');
+    }
+
+    res.render('topics/edit', { topic, error: null });
+  } catch (err) {
+    console.error(err);
+    res.send('Erreur serveur');
+  }
+};
+
+// Traiter modification topic
+exports.edit = async (req, res) => {
+  const { title, body, tags } = req.body;
+  const topicId = req.params.id;
+
+  try {
+    const topic = await getTopicById(topicId);
+    if (!topic) return res.send('Topic introuvable');
+
+    if (topic.author_id !== req.session.user.id && req.session.user.role !== 'admin') {
+      return res.send('Non autorisé');
+    }
+
+    const tagsArray = tags ? tags.split(',') : [];
+    await updateTopic(topicId, title, body, tagsArray);
+    res.redirect(`/topics/${topicId}`);
+  } catch (err) {
+    console.error(err);
+    res.send('Erreur serveur');
+  }
+};
+
+// Supprimer un topic
+exports.deleteTopic = async (req, res) => {
+  const topicId = req.params.id;
+
+  try {
+    const topic = await getTopicById(topicId);
+    if (!topic) return res.send('Topic introuvable');
+
+    if (topic.author_id !== req.session.user.id && req.session.user.role !== 'admin') {
+      return res.send('Non autorisé');
+    }
+
+    await deleteTopic(topicId);
+    res.redirect('/');
   } catch (err) {
     console.error(err);
     res.send('Erreur serveur');

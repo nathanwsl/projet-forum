@@ -6,12 +6,16 @@
 </head>
 <body>
   <h1>Forum</h1>
-  <% if (user) { %>
-    <p>Connecté : <strong><%= user.username %></strong> | <a href="/logout">Déconnexion</a></p>
-    <a href="/topics/create">+ Nouveau topic</a>
-  <% } else { %>
-    <a href="/login">Se connecter</a> | <a href="/register">S'inscrire</a>
+<% if (user) { %>
+  <p>Connecté : <strong><%= user.username %></strong> | <a href="/logout">Déconnexion</a>
+  <% if (user.role === 'admin') { %>
+    | <a href="/admin">⚙️ Dashboard Admin</a>
   <% } %>
+  </p>
+  <a href="/topics/create">+ Nouveau topic</a>
+<% } else { %>
+  <a href="/login">Se connecter</a> | <a href="/register">S'inscrire</a>
+<% } %>
 
   <hr>
 

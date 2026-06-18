@@ -12,6 +12,17 @@
   <p>État : <%= topic.status %></p>
   <hr>
   <p><%= topic.body %></p>
+  <p>État : <%= topic.status %></p>
+
+<% if (user && user.id === topic.author_id) { %>
+  <a href="/topics/<%= topic.id %>/edit">✏️ Modifier</a>
+  <form method="POST" action="/topics/<%= topic.id %>/delete" style="display:inline;">
+    <button type="submit" onclick="return confirm('Supprimer ce topic ?')">🗑️ Supprimer</button>
+  </form>
+<% } %>
+
+<hr>
+<p><%= topic.body %></p>
   <hr>
 
   <h2>Messages (<%= messages.length %>)</h2>

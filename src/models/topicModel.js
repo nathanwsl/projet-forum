@@ -105,4 +105,28 @@ async function getAllTags() {
   return rows;
 }
 
-module.exports = { createTopic, getAllTopics, getTopicById, countTopics, getTopicsByTag, searchTopics, getAllTags };
+async function updateTopic(topicId, title, body, tags) {
+  await db.query(
+    'UPDATE topics SET title = ?, body = ? WHERE id = ?',
+    [title, body, topicId]
+  );
+
+  // Supprimer les anciens tags
+  await db.query('DELETE FROM topic_tags WHERE topic_id = ?', [topicId]);
+
+  // Ajouter les nouveaux tags
+  for (const tagName of tags) {
+    const trimmed = tagName.trim();
+    if (!trimmed) continue;
+    await db.query('INSERT IGNORE INTO tags (name) VALUES (?)', [trimmed]);
+    const [tagRows] = await db.query('SELECT id FROM tags WHERE name = ?', [trimmed]);
+    const tagId = tagRows[0].id;
+    await db.query('INSERT INTO topic_tags (topic_id, tag_id) VALUES (?, ?)', [topicId, tagId]);
+  }
+}
+
+async function deleteTopic(topicId) {
+  await db.query('DELETE FROM topics WHERE id = ?', [topicId]);
+}
+
+module.exports = { createTopic, getAllTopics, getTopicById, countTopics, getTopicsByTag, searchTopics, getAllTags, updateTopic, deleteTopic };

@@ -1,3 +1,4 @@
+const db = require('../models/db');
 const { deleteTopic, getTopicById, updateTopic } = require('../models/topicModel');
 const { deleteMessage } = require('../models/messageModel');
 

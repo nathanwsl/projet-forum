@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Admin</title>
+</head>
+<body>
+  <h1>Dashboard Administrateur</h1>
+  <a href="/">← Retour au forum</a>
+  <hr>
+
+  <h2>Topics</h2>
+  <table border="1" cellpadding="5">
+    <tr>
+      <th>ID</th>
+      <th>Titre</th>
+      <th>Auteur</th>
+      <th>État</th>
+      <th>Actions</th>
+    </tr>
+    <% topics.forEach(function(topic) { %>
+      <tr>
+        <td><%= topic.id %></td>
+        <td><a href="/topics/<%= topic.id %>"><%= topic.title %></a></td>
+        <td><%= topic.author %></td>
+        <td><%= topic.status %></td>
+        <td>
+          <form method="POST" action="/admin/topics/<%= topic.id %>/status" style="display:inline;">
+            <select name="status">
+              <option value="open" <%= topic.status === 'open' ? 'selected' : '' %>>Ouvert</option>
+              <option value="closed" <%= topic.status === 'closed' ? 'selected' : '' %>>Fermé</option>
+              <option value="archived" <%= topic.status === 'archived' ? 'selected' : '' %>>Archivé</option>
+            </select>
+            <button type="submit">Changer</button>
+          </form>
+          <form method="POST" action="/admin/topics/<%= topic.id %>/delete" style="display:inline;">
+            <button type="submit" onclick="return confirm('Supprimer ?')">🗑️</button>
+          </form>
+        </td>
+      </tr>
+    <% }) %>
+  </table>
+
+  <hr>
+  <h2>Messages</h2>
+  <table border="1" cellpadding="5">
+    <tr>
+      <th>ID</th>
+      <th>Auteur</th>
+      <th>Topic</th>
+      <th>Message</th>
+      <th>Actions</th>
+    </tr>
+    <% messages.forEach(function(message) { %>
+      <tr>
+        <td><%= message.id %></td>
+        <td><%= message.author %></td>
+        <td><%= message.topic_title %></td>
+        <td><%= message.body.substring(0, 50) %>...</td>
+        <td>
+          <form method="POST" action="/admin/messages/<%= message.id %>/delete">
+            <button type="submit" onclick="return confirm('Supprimer ?')">🗑️</button>
+          </form>
+        </td>
+      </tr>
+    <% }) %>
+  </table>
+
+  <hr>
+  <h2>Utilisateurs</h2>
+  <table border="1" cellpadding="5">
+    <tr>
+      <th>ID</th>
+      <th>Pseudo</th>
+      <th>Email</th>
+      <th>Rôle</th>
+      <th>Banni</th>
+      <th>Actions</th>
+    </tr>
+    <% users.forEach(function(u) { %>
+      <tr>
+        <td><%= u.id %></td>
+        <td><%= u.username %></td>
+        <td><%= u.email %></td>
+        <td><%= u.role %></td>
+        <td><%= u.is_banned ? 'Oui' : 'Non' %></td>
+        <td>
+          <% if (!u.is_banned) { %>
+            <form method="POST" action="/admin/users/<%= u.id %>/ban">
+              <button type="submit" onclick="return confirm('Bannir ?')">🚫 Bannir</button>
+            </form>
+          <% } else { %>
+            <form method="POST" action="/admin/users/<%= u.id %>/unban">
+              <button type="submit">✅ Débannir</button>
+            </form>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </table>
+
+</body>
+</html>
