@@ -1,9 +1,9 @@
 const db = require('./db');
 
-async function createMessage(topicId, authorId, body) {
+async function createMessage(topicId, authorId, body, parentId = null) {
   const [result] = await db.query(
-    'INSERT INTO messages (topic_id, author_id, body) VALUES (?, ?, ?)',
-    [topicId, authorId, body]
+    'INSERT INTO messages (topic_id, author_id, body, parent_id) VALUES (?, ?, ?, ?)',
+    [topicId, authorId, body, parentId]
   );
   return result.insertId;
 }
@@ -18,10 +18,14 @@ async function getMessagesByTopic(topicId, sort = 'date', limit = 10, offset = 0
   const [rows] = await db.query(`
     SELECT m.*, u.username,
       SUM(CASE WHEN r.type = 'like' THEN 1 ELSE 0 END) as likes,
-      SUM(CASE WHEN r.type = 'dislike' THEN 1 ELSE 0 END) as dislikes
+      SUM(CASE WHEN r.type = 'dislike' THEN 1 ELSE 0 END) as dislikes,
+      p.body as parent_body,
+      pu.username as parent_username
     FROM messages m
     JOIN users u ON m.author_id = u.id
     LEFT JOIN reactions r ON m.id = r.message_id
+    LEFT JOIN messages p ON m.parent_id = p.id
+    LEFT JOIN users pu ON p.author_id = pu.id
     WHERE m.topic_id = ?
     GROUP BY m.id
     ORDER BY ${orderBy}

@@ -26,5 +26,33 @@ async function findUserById(id) {
   const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [id]);
   return rows[0];
 }
+async function updateUser(id, bio, avatar) {
+  await db.query(
+    'UPDATE users SET bio = ?, avatar = ? WHERE id = ?',
+    [bio, avatar, id]
+  );
+}
 
-module.exports = { createUser, findUserByIdentifier, findUserById, hashPassword };
+async function updateLastLogin(id) {
+  await db.query(
+    'UPDATE users SET last_login = NOW() WHERE id = ?',
+    [id]
+  );
+}
+
+async function getUserStats(id) {
+  const [messages] = await db.query(
+    'SELECT COUNT(*) as total FROM messages WHERE author_id = ?',
+    [id]
+  );
+  const [topics] = await db.query(
+    'SELECT COUNT(*) as total FROM topics WHERE author_id = ?',
+    [id]
+  );
+  return {
+    messages: messages[0].total,
+    topics: topics[0].total
+  };
+}
+
+module.exports = { createUser, findUserByIdentifier, findUserById, hashPassword, updateUser, updateLastLogin, getUserStats };

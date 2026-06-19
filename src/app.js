@@ -38,6 +38,7 @@ db.query('SELECT 1')
 app.use('/', require('./routes/authRoutes'));
 app.use('/', require('./routes/topicRoutes'));
 app.use('/', require('./routes/adminRoutes'));
+app.use('/', require('./routes/userRoutes'));
 
 app.listen(process.env.PORT, () => {
   console.log(`Serveur lancé sur http://localhost:${process.env.PORT}`);

@@ -8,21 +8,22 @@
 <body>
 
   <nav class="navbar">
-    <h1>💬 Forum</h1>
-    <div>
-      <% if (user) { %>
-        Connecté : <strong style="color:white"><%= user.username %></strong>
-        <a href="/topics/create" class="btn btn-primary" style="margin-left:15px">+ Nouveau topic</a>
-        <% if (user.role === 'admin') { %>
-          <a href="/admin">⚙️ Admin</a>
-        <% } %>
-        <a href="/logout">Déconnexion</a>
-      <% } else { %>
-        <a href="/login">Se connecter</a>
-        <a href="/register">S'inscrire</a>
+  <h1>💬 Forum</h1>
+  <div>
+    <% if (user) { %>
+      <a href="/profile/<%= user.id %>">👤 <%= user.username %></a>
+      <a href="/topics/create" class="btn btn-primary" style="margin-left:15px">+ Nouveau topic</a>
+      <% if (user.role === 'admin') { %>
+        <a href="/admin">⚙️ Admin</a>
       <% } %>
-    </div>
-  </nav>
+      <a href="/settings">Paramètres</a>
+      <a href="/logout">Déconnexion</a>
+    <% } else { %>
+      <a href="/login">Se connecter</a>
+      <a href="/register">S'inscrire</a>
+    <% } %>
+  </div>
+</nav>
 
   <div class="container">
 
@@ -54,8 +55,7 @@
       <div class="topic-card">
         <h3><a href="/topics/<%= topic.id %>"><%= topic.title %></a></h3>
         <div class="topic-meta">
-          Par <strong><%= topic.username %></strong> | <%= new Date(topic.created_at).toLocaleDateString('fr-FR') %>
-          &nbsp;|&nbsp;
+          Par <strong><a href="/profile/<%= topic.author_id %>" style="text-decoration:none;color:#2c3e50"><%= topic.username %></a></strong> | <%= new Date(topic.created_at).toLocaleDateString('fr-FR') %>
           <span class="status-<%= topic.status %>"><%= topic.status %></span>
         </div>
         <div style="margin-top:8px">

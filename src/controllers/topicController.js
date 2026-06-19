@@ -77,18 +77,19 @@ exports.show = async (req, res) => {
     res.send('Erreur serveur');
   }
 };
-// Poster un message
 exports.postMessage = async (req, res) => {
-  const { body } = req.body;
+  const { body, parent_id } = req.body;
   const topicId = req.params.id;
   const authorId = req.session.user.id;
+
   if (!body) return res.redirect(`/topics/${topicId}`);
+
   try {
     const topic = await getTopicById(topicId);
     if (topic.status === 'closed' || topic.status === 'archived') {
       return res.redirect(`/topics/${topicId}`);
     }
-    await createMessage(topicId, authorId, body);
+    await createMessage(topicId, authorId, body, parent_id || null);
     res.redirect(`/topics/${topicId}`);
   } catch (err) {
     console.error(err);

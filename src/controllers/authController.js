@@ -1,4 +1,4 @@
-const { createUser, findUserByIdentifier, hashPassword } = require('../models/userModel');
+const { createUser, findUserByIdentifier, hashPassword, updateLastLogin } = require('../models/userModel');
 
 // Afficher page inscription
 exports.showRegister = (req, res) => {
@@ -68,12 +68,14 @@ exports.login = async (req, res) => {
       role: user.role
     };
 
+    await updateLastLogin(user.id);
     res.redirect('/');
   } catch (err) {
     console.error(err);
     res.render('auth/login', { error: 'Une erreur est survenue.' });
   }
 };
+
 
 // Déconnexion
 exports.logout = (req, res) => {

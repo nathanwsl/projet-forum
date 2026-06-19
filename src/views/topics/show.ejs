@@ -5,6 +5,12 @@
   <title><%= topic.title %></title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
+<script>
+  function toggleReply(id) {
+    const div = document.getElementById('reply-' + id);
+    div.style.display = div.style.display === 'none' ? 'block' : 'none';
+  }
+</script>
 <body>
 
   <nav class="navbar">
@@ -82,29 +88,58 @@
     </div>
 
     <% messages.forEach(function(message) { %>
-      <div class="message-card">
-        <div class="message-header">
-          <span class="message-author">👤 <%= message.username %></span>
-          <span class="message-date"><%= new Date(message.sent_at).toLocaleDateString('fr-FR') %></span>
-        </div>
-        <p class="message-body"><%= message.body %></p>
-        <div class="reactions">
-          <form method="POST" action="/topics/<%= topic.id %>/messages/<%= message.id %>/react">
-            <input type="hidden" name="type" value="like">
-            <button type="submit">👍 <%= message.likes %></button>
-          </form>
-          <form method="POST" action="/topics/<%= topic.id %>/messages/<%= message.id %>/react">
-            <input type="hidden" name="type" value="dislike">
-            <button type="submit">👎 <%= message.dislikes %></button>
-          </form>
-          <% if (user && (user.id === topic.author_id || user.id === message.author_id || user.role === 'admin')) { %>
-            <form method="POST" action="/topics/<%= topic.id %>/messages/<%= message.id %>/delete">
-              <button type="submit" class="btn btn-danger" style="padding:4px 10px;font-size:13px" onclick="return confirm('Supprimer ?')">🗑️</button>
-            </form>
-          <% } %>
-        </div>
+  <div class="message-card">
+    <div class="message-header">
+      <a href="/profile/<%= message.author_id %>" style="text-decoration:none;color:#2c3e50">
+        <span class="message-author">👤 <%= message.username %></span>
+      </a>
+      <span class="message-date"><%= new Date(message.sent_at).toLocaleDateString('fr-FR') %></span>
+    </div>
+
+    <% if (message.parent_id) { %>
+      <div style="background:#f0f0f0;border-left:3px solid #3498db;padding:8px 12px;margin-bottom:10px;border-radius:4px;font-size:13px;color:#666">
+        <strong>↩ <%= message.parent_username %></strong> : <%= message.parent_body.substring(0, 100) %><%= message.parent_body.length > 100 ? '...' : '' %>
       </div>
-    <% }) %>
+    <% } %>
+
+    <p class="message-body"><%= message.body %></p>
+
+    <div class="reactions">
+      <form method="POST" action="/topics/<%= topic.id %>/messages/<%= message.id %>/react">
+        <input type="hidden" name="type" value="like">
+        <button type="submit">👍 <%= message.likes %></button>
+      </form>
+      <form method="POST" action="/topics/<%= topic.id %>/messages/<%= message.id %>/react">
+        <input type="hidden" name="type" value="dislike">
+        <button type="submit">👎 <%= message.dislikes %></button>
+      </form>
+
+      <% if (user) { %>
+        <button onclick="toggleReply('<%= message.id %>')" style="background:none;border:1px solid #ddd;border-radius:20px;padding:4px 12px;cursor:pointer;font-size:14px">↩ Répondre</button>
+      <% } %>
+
+      <% if (user && (user.id === topic.author_id || user.id === message.author_id || user.role === 'admin')) { %>
+        <form method="POST" action="/topics/<%= topic.id %>/messages/<%= message.id %>/delete">
+          <button type="submit" class="btn btn-danger" style="padding:4px 10px;font-size:13px" onclick="return confirm('Supprimer ?')">🗑️</button>
+        </form>
+      <% } %>
+    </div>
+
+    <% if (user && topic.status === 'open') { %>
+      <div id="reply-<%= message.id %>" style="display:none;margin-top:10px">
+        <form method="POST" action="/topics/<%= topic.id %>/messages">
+          <input type="hidden" name="parent_id" value="<%= message.id %>">
+          <div class="form-group">
+            <textarea name="body" rows="3" placeholder="Votre réponse..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="padding:6px 14px">Répondre</button>
+          <button type="button" onclick="toggleReply('<%= message.id %>')" class="btn btn-secondary" style="padding:6px 14px">Annuler</button>
+        </form>
+      </div>
+    <% } %>
+
+  </div>
+<% }) %>
 
     <% if (user && topic.status === 'open') { %>
       <div class="form-card" style="max-width:100%;margin-top:20px">
